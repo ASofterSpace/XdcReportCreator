@@ -32,6 +32,8 @@ public class Main {
 		for (XlsxSheet sheet : sheets) {
 			System.out.println("Found sheet: " + sheet.getTitle());
 		}
+		
+		template.saveTo("report.xlsx");
 	}
 
 }
