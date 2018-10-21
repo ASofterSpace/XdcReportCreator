@@ -1,6 +1,11 @@
 package com.asofterspace.xdcReportCreator;
 
+import com.asofterspace.toolbox.io.IoUtils;
+import com.asofterspace.toolbox.io.XlsxFile;
+import com.asofterspace.toolbox.io.XlsxSheet;
 import com.asofterspace.toolbox.Utils;
+
+import java.util.List;
 
 
 public class Main {
@@ -16,7 +21,17 @@ public class Main {
 		Utils.setVersionNumber(VERSION_NUMBER);
 		Utils.setVersionDate(VERSION_DATE);
 		
+		IoUtils.cleanAllWorkDirs();
+
 		System.out.println(Utils.getFullProgramIdentifierWithDate());
+
+		XlsxFile template = new XlsxFile("template.xlsx");
+
+		List<XlsxSheet> sheets = template.getSheets();
+
+		for (XlsxSheet sheet : sheets) {
+			System.out.println("Found sheet: " + sheet.getTitle());
+		}
 	}
 
 }
