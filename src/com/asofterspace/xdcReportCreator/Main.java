@@ -60,6 +60,10 @@ public class Main {
 				// System.out.println("Setting Angebotsnummer to " + inputData.getValue("Angebotsnummer"));
 				// System.out.println("(The old one was " + 			sheet.getCellContent("C9") + ")");
 				sheet.setCellContent("C9", inputData.getValue("Angebotsnummer"));
+				
+				// delete the scenario-based XDC for now
+				// TODO :: actually read scenarios from input.json!
+				sheet.deleteCellBlock("A20", "H28");
 			}
 
 			// only adjust the footer for sheets that have a footer in the template
