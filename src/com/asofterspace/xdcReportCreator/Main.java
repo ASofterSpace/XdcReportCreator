@@ -1,6 +1,7 @@
 package com.asofterspace.xdcReportCreator;
 
 import com.asofterspace.toolbox.io.IoUtils;
+import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.XlsxFile;
 import com.asofterspace.toolbox.io.XlsxSheet;
@@ -33,7 +34,9 @@ public class Main {
 		
 		System.out.println("Loading the input data for the report from " + inputPath + "...");
 		
-		JsonFile inputData = new JsonFile(inputPath);
+		JsonFile inputFile = new JsonFile(inputPath);
+		JSON inputData = inputFile.getAllContents();
+		JSON standardXDC = inputData.get("StandardXDC");
 		
 		System.out.println("Loading the template...");
 		
@@ -43,7 +46,7 @@ public class Main {
 
 		System.out.println("Adjusting the template to generate this particular report...");
 
-		String footerdate = inputData.getValue("Datum");
+		String footerdate = inputData.getString("Datum");
 
 		if ((footerdate == null) || footerdate.equals("") || footerdate.equals("heute")) {
 			DateFormat df = new SimpleDateFormat("dd.MM.yyyy");
@@ -57,13 +60,42 @@ public class Main {
 
 			// Auftrag
 			if (sheet.getTitle().startsWith("1. ")) {
-				// System.out.println("Setting Angebotsnummer to " + inputData.getValue("Angebotsnummer"));
+				// System.out.println("Setting Angebotsnummer to " + inputData.getString("Angebotsnummer"));
 				// System.out.println("(The old one was " + 			sheet.getCellContent("C9") + ")");
-				sheet.setCellContent("C9", inputData.getValue("Angebotsnummer"));
+				sheet.setCellContent("C9", inputData.getString("Angebotsnummer"));
 				
 				// delete the scenario-based XDC for now
 				// TODO :: actually read scenarios from input.json!
 				sheet.deleteCellBlock("A20", "H28");
+			}
+			
+			// Daten Standard XDC
+			if (sheet.getTitle().startsWith("2. ")) {
+				sheet.setCellContent("C8", inputData.getInteger("Berichtsjahr"));
+				sheet.setCellContent("C10", inputData.getString("Firma"));
+				sheet.setCellContent("C12", inputData.getString("FirmenISIN"));
+				
+				sheet.setCellContent("A23", inputData.getString("Firma"));
+				sheet.setCellContent("A26", standardXDC.getString("DatenDatum"));
+				
+				sheet.setCellContent("A16", standardXDC.getLong("GHGScope1"));
+				sheet.setCellContent("B16", standardXDC.getLong("GHGScope2"));
+				sheet.setCellContent("C16", standardXDC.getLong("GHGScope3"));
+				sheet.setCellContent("D16", standardXDC.getLong("EBITDA"));
+				sheet.setCellContent("F16", standardXDC.getLong("Personalkosten"));
+				
+				Integer basisjahr = standardXDC.getInteger("Basisjahr");
+				sheet.setCellContent("C36", basisjahr);
+				sheet.setCellContent("C38", basisjahr);
+				sheet.setCellContent("C40", basisjahr);
+				sheet.setCellContent("C42", basisjahr);
+				sheet.setCellContent("E34", basisjahr + "-2050");
+				sheet.setCellContent("F34", basisjahr + "-2050");
+				
+				String entwicklungProcPA = standardXDC.getString("EntwicklungProcPA");
+				sheet.setCellContent("E36", entwicklungProcPA + "% p.a.");
+				sheet.setCellContent("E38", entwicklungProcPA + "% p.a.");
+				sheet.setCellContent("F40", entwicklungProcPA + "% p.a.");
 			}
 
 			// only adjust the footer for sheets that have a footer in the template

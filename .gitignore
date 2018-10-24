@@ -42,3 +42,6 @@ config
 
 # work directory
 workdir
+
+# input files other than the example one
+input_*.json

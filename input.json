@@ -1,14 +1,19 @@
 {
-	"Angebotsnummer": "20181021_01",
+	"Angebotsnummer": "20181023_01",
 	"Datum": "heute",
+	"Berichtsjahr": 2018,
+	"Firma": "Example Corp.",
+	"FirmenISIN": "XC987654321",
+	"StandardXDC": {
+		"Basisjahr": 2016,
+		"EntwicklungProcPA": "2,8",
+		"DatenDatum": "23.10.2018 (Example Corp. - insecure mail)",
+		"GHGScope1": 1234567,
+		"GHGScope2": 123456,
+		"GHGScope3": 12345678,
+		"EBITDA": 123456789,
+		"Personalkosten": 12345,
+	},
 	"Szenarien": [
-		{
-			"Titel": "2A: Szenario 1:\nKlimaziel 2030\nEmissionsziel 2030",
-			"Beschreibung": "Szenariobasierte XDC und deren Aufspaltung in Szenariobasierte Scope 1 XDC und Szenariobasierte Scope 2 XDC unter der Annahme der Erfüllung eines Emissionziels bis 2030 von BASF basierend auf unternehmenseigenen Daten."
-		},
-		{
-			"Titel": "2B: Szenario 2:\nKlimaziel 2050\nEmissionsziel 2050",
-			"Beschreibung": "Szenariobasierte XDC und deren Aufspaltung in Szenariobasierte Scope 1 XDC und Szenariobasierte Scope 2 XDC unter der Annahme der Erfüllung eines Emissionziels bis 2050 von BASF basierend auf unternehmenseigenen Daten."
-		},
-	]
+	],
 }
