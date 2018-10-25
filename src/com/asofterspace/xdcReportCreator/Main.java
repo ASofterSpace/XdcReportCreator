@@ -103,6 +103,7 @@ public class Main {
 				// set the date in the footer
 				sheet.setFooterContent("R", footerdate);
 				
+				/*
 				// set the page number in the footer
 				sheet.setFooterContent("C", "&P+"+pagenum);
 				// TODO :: what about multi-page sheets? (
@@ -118,6 +119,28 @@ public class Main {
 				if (sheet.getTitle().startsWith("6. ")) {
 					pagenum += 4;
 				}
+				*/
+				// ACTUALLY, just set the footer to P (pagenum) and export everything as one big PDF via VBA!
+				sheet.setFooterContent("C", "&P");
+				/*
+				for that, we can use the following VBA:
+				
+Private Sub Workbook_Open()
+
+    For i = 1 To 6
+        Sheets(i).Activate
+        ActiveSheet.UsedRange.Select
+    Next i
+
+    ThisWorkbook.Sheets(Array(1, 2, 3, 4, 5, 6)).Select
+    ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:= _
+        ThisWorkbook.Path & "/report.pdf", Quality:=xlQualityStandard, _
+        IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=False
+      
+End Sub
+
+				however, we also have to convert the file to xlsm, AND we have to specify the working path such that the file is stored there
+				*/
 			}
 			
 			sheet.save();

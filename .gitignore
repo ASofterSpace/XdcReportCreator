@@ -39,6 +39,8 @@ config
 
 # templates and generated reports
 *.xlsx
+*.xlsm
+*.pdf
 
 # work directory
 workdir
