@@ -1,5 +1,6 @@
 package com.asofterspace.xdcReportCreator;
 
+import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
@@ -7,6 +8,7 @@ import com.asofterspace.toolbox.io.XlsxFile;
 import com.asofterspace.toolbox.io.XlsxSheet;
 import com.asofterspace.toolbox.Utils;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -16,8 +18,8 @@ import java.util.List;
 public class Main {
 
 	public final static String PROGRAM_TITLE = "XDC Report Creator (Java Part)";
-	public final static String VERSION_NUMBER = "0.0.0.2(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
-	public final static String VERSION_DATE = "19. October 2018 - 21. October 2018";
+	public final static String VERSION_NUMBER = "0.0.0.3(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
+	public final static String VERSION_DATE = "19. October 2018 - 25. October 2018";
 
 	public static void main(String[] args) {
 	
@@ -26,11 +28,21 @@ public class Main {
 		Utils.setVersionNumber(VERSION_NUMBER);
 		Utils.setVersionDate(VERSION_DATE);
 		
-		IoUtils.cleanAllWorkDirs();
-
 		System.out.println(Utils.getFullProgramIdentifierWithDate());
 
 		String inputPath = "input.json";
+		String templateFileName = "template.xlsx";
+		String reportFileName = "report.xlsx";
+		String reportMacroFileName = "report.xlsm";
+		String reportPDFFileName = "report.pdf";
+		
+		System.out.println("Cleaning environment after last run...");
+		
+		IoUtils.cleanAllWorkDirs();
+
+		(new File(reportFileName)).delete();
+//		(new File(reportMacroFileName)).delete();
+		(new File(reportPDFFileName)).delete();
 		
 		System.out.println("Loading the input data for the report from " + inputPath + "...");
 		
@@ -40,7 +52,7 @@ public class Main {
 		
 		System.out.println("Loading the template...");
 		
-		XlsxFile template = new XlsxFile("template.xlsx");
+		XlsxFile template = new XlsxFile(templateFileName);
 
 		List<XlsxSheet> sheets = template.getSheets();
 
@@ -146,14 +158,31 @@ End Sub
 			sheet.save();
 		}
 		
-		String reportFileName = "report.xlsx";
-		
 		System.out.println("Saving the report to " + reportFileName + "...");
 		
 		template.saveTo(reportFileName);
 		
 		template.close();
 		
+		System.out.println("Adding macros to the report and creating " + reportMacroFileName + "...");
+		
+		// TODO!
+
+		System.out.println("Converting the report to PDF...");
+		
+		String reportMacroAbsoluteFileName = (new File(reportMacroFileName)).getAbsoluteFilename();
+		String fullExcelPath = inputData.getString("Excel");
+		String excelExe = (new File(fullExcelPath)).getLocalFilename();
+		String excelPath = fullExcelPath.substring(0, fullExcelPath.length() - excelExe.length() - 1);
+
+		try {
+			ProcessBuilder processBuilder = new ProcessBuilder(fullExcelPath, reportMacroAbsoluteFileName);
+			processBuilder.directory(new java.io.File(excelPath));
+			Process process = processBuilder.start();
+		} catch (IOException e) {
+			System.err.println("Oh no - Excel could not be started to convert the file to PDF! Exception: " + e);
+		}
+
 		System.out.println("Done!");
 		System.out.println("A softer space wishes you a shiny day. :)");
 	}
