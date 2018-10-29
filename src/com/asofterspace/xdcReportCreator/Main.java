@@ -79,6 +79,8 @@ public class Main {
 				// delete the scenario-based XDC for now
 				// TODO :: actually read scenarios from input.json!
 				sheet.deleteCellBlock("A20", "H28");
+				
+				sheet.setCellContent("C16", standardXDC.getString("Beschreibung"));
 			}
 			
 			// Daten Standard XDC
@@ -110,6 +112,30 @@ public class Main {
 				sheet.setCellContent("F40", entwicklungProcPA + "% p.a.");
 			}
 
+			// Daten Szenariobasierte XDC
+			if (sheet.getTitle().startsWith("3. ")) {
+				// delete the scenario-based XDC for now
+				// TODO :: actually read scenarios from input.json!
+				sheet.deleteCellBlock("A1", "G60");
+			}
+			
+			// Ergebnisse
+			if (sheet.getTitle().startsWith("4. ")) {
+				// delete the scenario-based XDC for now
+				// TODO :: actually read scenarios from input.json!
+				sheet.deleteCellBlock("A10", "H12");
+				sheet.deleteCellBlock("A15", "K70");
+			}
+			
+			// Berechnung
+			if (sheet.getTitle().startsWith("5. ")) {
+				sheet.setCellContent("B13", inputData.getString("Firma"));
+				
+				// delete the scenario-based XDC for now
+				// TODO :: actually read scenarios from input.json!
+				sheet.deleteCellBlock("A17", "AJ66");
+			}
+			
 			// only adjust the footer for sheets that have a footer in the template
 			if (sheet.hasFooter()) {
 				// set the date in the footer
@@ -136,15 +162,20 @@ public class Main {
 				sheet.setFooterContent("C", "&P");
 				/*
 				for that, we can use the following VBA:
-				
+
+TODO :: actually create array of sheets and use that in the first loop too,
+        and dynamically figure out which one is the fifth?
+
 Private Sub Workbook_Open()
 
-    For i = 1 To 6
+    For i = 1 To 4
         Sheets(i).Activate
         ActiveSheet.UsedRange.Select
     Next i
+    Sheets(6).Activate
+    ActiveSheet.UsedRange.Select
 
-    ThisWorkbook.Sheets(Array(1, 2, 3, 4, 5, 6)).Select
+    ThisWorkbook.Sheets(Array(1, 2, 3, 4, 6)).Select
     ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:= _
         ThisWorkbook.Path & "/report.pdf", Quality:=xlQualityStandard, _
         IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=False

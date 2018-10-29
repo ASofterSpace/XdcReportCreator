@@ -6,6 +6,7 @@
 	"FirmenISIN": "XC987654321",
 	"StandardXDC": {
 		"Basisjahr": 2016,
+		"Beschreibung": "Standard XDC und deren Aufspaltung in Scope 1 XDC und Scope 2 XDC nach Standard Parametereingabe von right. basierend auf unternehmenseigenen Daten zur Bestimmung des Status Quo.",
 		"EntwicklungProcPA": "2,8",
 		"DatenDatum": "23.10.2018 (Example Corp. - insecure mail)",
 		"GHGScope1": 1234567,
