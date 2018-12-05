@@ -4,6 +4,7 @@ import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
+import com.asofterspace.toolbox.io.XlsmFile;
 import com.asofterspace.toolbox.io.XlsxFile;
 import com.asofterspace.toolbox.io.XlsxSheet;
 import com.asofterspace.toolbox.Utils;
@@ -17,9 +18,9 @@ import java.util.List;
 
 public class Main {
 
-	public final static String PROGRAM_TITLE = "XDC Report Creator (Java Part)";
-	public final static String VERSION_NUMBER = "0.0.0.3(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
-	public final static String VERSION_DATE = "19. October 2018 - 25. October 2018";
+	public final static String PROGRAM_TITLE = "XDC Report Creator";
+	public final static String VERSION_NUMBER = "0.0.0.4(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
+	public final static String VERSION_DATE = "19. October 2018 - 4. December 2018";
 
 	public static void main(String[] args) {
 	
@@ -41,7 +42,7 @@ public class Main {
 		IoUtils.cleanAllWorkDirs();
 
 		(new File(reportFileName)).delete();
-//		(new File(reportMacroFileName)).delete();
+		(new File(reportMacroFileName)).delete();
 		(new File(reportPDFFileName)).delete();
 		
 		System.out.println("Loading the input data for the report from " + inputPath + "...");
@@ -158,11 +159,22 @@ public class Main {
 					pagenum += 4;
 				}
 				*/
-				// ACTUALLY, just set the footer to P (pagenum) and export everything as one big PDF via VBA!
+				// ACTUALLY, just set the footer to P (pagenum) and export everything as one big PDF via VBA! (see the part where we save as XLSM ^^)
 				sheet.setFooterContent("C", "&P");
-				/*
-				for that, we can use the following VBA:
-
+			}
+			
+			sheet.save();
+		}
+		
+		System.out.println("Saving the report to " + reportFileName + "...");
+		
+		template.saveTo(reportFileName);
+		
+		System.out.println("Adding macros to the report and creating " + reportMacroFileName + "...");
+		
+		XlsmFile macroTemplate = template.convertToXlsm();
+		
+		/* add the following Macro:
 TODO :: actually create array of sheets and use that in the first loop too,
         and dynamically figure out which one is the fifth?
 
@@ -181,24 +193,16 @@ Private Sub Workbook_Open()
         IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=False
       
 End Sub
+		*/
+		
+		macroTemplate.addMacro();
 
-				however, we also have to convert the file to xlsm, AND we have to specify the working path such that the file is stored there
-				*/
-			}
-			
-			sheet.save();
-		}
+		macroTemplate.saveTo(reportMacroFileName);
 		
-		System.out.println("Saving the report to " + reportFileName + "...");
-		
-		template.saveTo(reportFileName);
-		
+		// close the files - this is important als XLSX and XLSM are zipped file types, and some temp files have to be cleared up!
 		template.close();
+		macroTemplate.close();
 		
-		System.out.println("Adding macros to the report and creating " + reportMacroFileName + "...");
-		
-		// TODO!
-
 		System.out.println("Converting the report to PDF...");
 		
 		String reportMacroAbsoluteFileName = (new File(reportMacroFileName)).getAbsoluteFilename();
