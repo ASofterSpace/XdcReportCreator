@@ -174,24 +174,38 @@ public class Main {
 		
 		XlsmFile macroTemplate = template.convertToXlsm();
 		
-		/* add the following Macro:
-TODO :: actually create array of sheets and use that in the first loop too,
-        and dynamically figure out which one is the fifth?
+		/* add the following Macro to the Workbook on Open:
 
 Private Sub Workbook_Open()
 
-    For i = 1 To 4
-        Sheets(i).Activate
-        ActiveSheet.UsedRange.Select
-    Next i
-    Sheets(6).Activate
-    ActiveSheet.UsedRange.Select
+    'Create an array that contains all the sheets which should be exported to PDF or printed
+    Dim sheetsToBePrinted() As String
+    Dim workshAmount As Integer
+    Dim worksh As Variant
 
-    ThisWorkbook.Sheets(Array(1, 2, 3, 4, 6)).Select
+    workshAmount = 0
+
+    For Each worksh In Worksheets
+		'Exclude sheet 5 - Berechnung (as it is basically the backend)
+        If Not Left(worksh.Name, 1) = "5" Then
+            workshAmount = workshAmount + 1
+            ReDim Preserve sheetsToBePrinted(1 To workshAmount)
+            sheetsToBePrinted(workshAmount) = worksh.Name
+        End If
+    Next
+    
+    'Activate and select all sheets which should be exported
+    For Each worksh In sheetsToBePrinted
+        Sheets(worksh).Activate
+        ActiveSheet.UsedRange.Select
+    Next
+
+    'Actually export the sheets as PDF
+    Sheets(sheetsToBePrinted).Select
     ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:= _
         ThisWorkbook.Path & "/report.pdf", Quality:=xlQualityStandard, _
         IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=False
-      
+
 End Sub
 		*/
 		
