@@ -4,6 +4,7 @@ import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
+import com.asofterspace.toolbox.io.PdfFile;
 import com.asofterspace.toolbox.io.XlsmFile;
 import com.asofterspace.toolbox.io.XlsxFile;
 import com.asofterspace.toolbox.io.XlsxSheet;
@@ -19,9 +20,23 @@ import java.util.List;
 public class Main {
 
 	public final static String PROGRAM_TITLE = "XDC Report Creator";
-	public final static String VERSION_NUMBER = "0.0.0.4(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
-	public final static String VERSION_DATE = "19. October 2018 - 4. December 2018";
+	public final static String VERSION_NUMBER = "0.0.0.5(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
+	public final static String VERSION_DATE = "19. October 2018 - 14. December 2018";
 
+	private final static String inputPath = "input.json";
+	private final static String templateFileName = "template.xlsx";
+	private final static String reportFileName = "report.xlsx";
+	private final static String reportMacroFileName = "report.xlsm";
+	private final static String reportPDFFileName = "report.pdf";
+	private final static String macroFileName = "res/vbaProject.bin";
+	
+	private static JSON inputData;
+	
+	private static XlsxFile template;
+	
+	private static XlsmFile macroTemplate;
+	
+	
 	public static void main(String[] args) {
 	
 		// let the Utils know in what program it is being used
@@ -31,12 +46,26 @@ public class Main {
 		
 		System.out.println(Utils.getFullProgramIdentifierWithDate());
 
-		String inputPath = "input.json";
-		String templateFileName = "template.xlsx";
-		String reportFileName = "report.xlsx";
-		String reportMacroFileName = "report.xlsm";
-		String reportPDFFileName = "report.pdf";
+		cleanEnvironment();
 		
+		loadInputData();
+		
+		createTemplate();
+		
+		// createMacroTemplate();
+		
+		// openTemplate();
+		
+		createPdfReport();
+		
+		closeAllTemplates();
+		
+		System.out.println("Done!");
+		System.out.println("A softer space wishes you a shiny day. :)");
+	}
+	
+	private static void cleanEnvironment() {
+	
 		System.out.println("Cleaning environment after last run...");
 		
 		IoUtils.cleanAllWorkDirs();
@@ -44,16 +73,23 @@ public class Main {
 		(new File(reportFileName)).delete();
 		(new File(reportMacroFileName)).delete();
 		(new File(reportPDFFileName)).delete();
-		
+	}
+	
+	private static void loadInputData() {
+	
 		System.out.println("Loading the input data for the report from " + inputPath + "...");
 		
 		JsonFile inputFile = new JsonFile(inputPath);
-		JSON inputData = inputFile.getAllContents();
-		JSON standardXDC = inputData.get("StandardXDC");
-		
+		inputData = inputFile.getAllContents();
+	}
+	
+	private static void createTemplate() {
+	
 		System.out.println("Loading the template...");
 		
-		XlsxFile template = new XlsxFile(templateFileName);
+		JSON standardXDC = inputData.get("StandardXDC");
+		
+		template = new XlsxFile(templateFileName);
 
 		List<XlsxSheet> sheets = template.getSheets();
 
@@ -169,55 +205,63 @@ public class Main {
 		System.out.println("Saving the report to " + reportFileName + "...");
 		
 		template.saveTo(reportFileName);
+	}
+	
+	private static void createMacroTemplate() {
+	
+		System.out.println("Creating macro-enabled report at " + reportMacroFileName + "...");
 		
-		System.out.println("Adding macros to the report and creating " + reportMacroFileName + "...");
+		macroTemplate = template.convertToXlsm();
 		
-		XlsmFile macroTemplate = template.convertToXlsm();
-		
-		/* add the following Macro to the Workbook on Open:
+		/*
+		// add the following Macro to the Workbook on Open:
 
-Private Sub Workbook_Open()
+		Private Sub Workbook_Open()
 
-    'Create an array that contains all the sheets which should be exported to PDF or printed
-    Dim sheetsToBePrinted() As String
-    Dim workshAmount As Integer
-    Dim worksh As Variant
+			'Create an array that contains all the sheets which should be exported to PDF or printed
+			Dim sheetsToBePrinted() As String
+			Dim workshAmount As Integer
+			Dim worksh As Variant
 
-    workshAmount = 0
+			workshAmount = 0
 
-    For Each worksh In Worksheets
-		'Exclude sheet 5 - Berechnung (as it is basically the backend)
-        If Not Left(worksh.Name, 1) = "5" Then
-            workshAmount = workshAmount + 1
-            ReDim Preserve sheetsToBePrinted(1 To workshAmount)
-            sheetsToBePrinted(workshAmount) = worksh.Name
-        End If
-    Next
-    
-    'Activate and select all sheets which should be exported
-    For Each worksh In sheetsToBePrinted
-        Sheets(worksh).Activate
-        ActiveSheet.UsedRange.Select
-    Next
+			For Each worksh In Worksheets
+				'Exclude sheet 5 - Berechnung (as it is basically the backend)
+				If Not Left(worksh.Name, 1) = "5" Then
+					workshAmount = workshAmount + 1
+					ReDim Preserve sheetsToBePrinted(1 To workshAmount)
+					sheetsToBePrinted(workshAmount) = worksh.Name
+				End If
+			Next
+			
+			'Activate and select all sheets which should be exported
+			For Each worksh In sheetsToBePrinted
+				Sheets(worksh).Activate
+				ActiveSheet.UsedRange.Select
+			Next
 
-    'Actually export the sheets as PDF
-    Sheets(sheetsToBePrinted).Select
-    ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:= _
-        ThisWorkbook.Path & "/report.pdf", Quality:=xlQualityStandard, _
-        IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=False
+			'Actually export the sheets as PDF
+			Sheets(sheetsToBePrinted).Select
+			ActiveSheet.ExportAsFixedFormat Type:=xlTypePDF, Filename:= _
+				ThisWorkbook.Path & "/report.pdf", Quality:=xlQualityStandard, _
+				IncludeDocProperties:=True, IgnorePrintAreas:=False, OpenAfterPublish:=False
 
-End Sub
+		End Sub
 		*/
 		
-		macroTemplate.addMacro();
+		// do NOT add the macro here, as we would need to also mess with binary files which we do not fully understand...
+		// ugh!
+		//
+		// File exportSheetsMacro = new File(macroFileName);
+		//
+		// macroTemplate.addMacro(exportSheetsMacro);
 
 		macroTemplate.saveTo(reportMacroFileName);
-		
-		// close the files - this is important als XLSX and XLSM are zipped file types, and some temp files have to be cleared up!
-		template.close();
-		macroTemplate.close();
-		
-		System.out.println("Converting the report to PDF...");
+	}
+
+	private static void openTemplate() {
+	
+		System.out.println("Opening the report in Excel..");
 		
 		String reportMacroAbsoluteFileName = (new File(reportMacroFileName)).getAbsoluteFilename();
 		String fullExcelPath = inputData.getString("Excel");
@@ -229,11 +273,40 @@ End Sub
 			processBuilder.directory(new java.io.File(excelPath));
 			Process process = processBuilder.start();
 		} catch (IOException e) {
-			System.err.println("Oh no - Excel could not be started to convert the file to PDF! Exception: " + e);
+			System.err.println("Oh no - Excel could not be started! Exception: " + e);
 		}
-
-		System.out.println("Done!");
-		System.out.println("A softer space wishes you a shiny day. :)");
+	}
+	
+	private static void createPdfReport() {
+	
+		PdfFile pdf = new PdfFile(reportPDFFileName);
+		
+		pdf.create("right. based on science");
+		
+		pdf.save();
+		
+		System.out.println("Debug :: trying to read and save ex2.pdf...");
+		PdfFile pdf2 = new PdfFile("ex2.pdf");
+		pdf2.save();
+		System.out.println("Debug :: trying to read and save ex3.pdf...");
+		PdfFile pdf3 = new PdfFile("ex3.pdf");
+		pdf3.save();
+		System.out.println("Debug :: trying to read and save ex4.pdf...");
+		PdfFile pdf4 = new PdfFile("ex4.pdf");
+		pdf4.save();
+	}
+	
+	private static void closeAllTemplates() {
+	
+		// close the files - this is important als XLSX and XLSM are zipped file types, and some temp files have to be cleared up!
+		
+		if (template != null) {
+			template.close();
+		}
+		
+		if (macroTemplate != null) {
+			macroTemplate.close();
+		}
 	}
 
 }

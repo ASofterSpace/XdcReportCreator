@@ -1,8 +1,8 @@
-set /p PhpPath=<php-path.config
+REM set /p PhpPath=<php-path.config
 
-%PhpPath%\php -f test.php
+REM %PhpPath%\php -f test.php
 
-pause
+REM pause
 
 REM Actually, let PHP call Java when it is necessary...
 
