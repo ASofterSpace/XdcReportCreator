@@ -1,3 +1,7 @@
+/**
+ * Unlicensed code created by A Softer Space, 2018
+ * www.asofterspace.com/licenses/unlicense.txt
+ */
 package com.asofterspace.xdcReportCreator;
 
 import com.asofterspace.toolbox.io.BinaryFile;
@@ -6,8 +10,6 @@ import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
-import com.asofterspace.toolbox.io.PdfFile;
-import com.asofterspace.toolbox.io.PdfObject;
 import com.asofterspace.toolbox.io.XlsmFile;
 import com.asofterspace.toolbox.io.XlsxFile;
 import com.asofterspace.toolbox.io.XlsxSheet;
@@ -23,15 +25,16 @@ import java.util.List;
 public class Main {
 
 	public final static String PROGRAM_TITLE = "XDC Report Creator";
-	public final static String VERSION_NUMBER = "0.0.0.5(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
-	public final static String VERSION_DATE = "19. October 2018 - 14. December 2018";
+	public final static String VERSION_NUMBER = "0.0.0.6(" + Utils.TOOLBOX_VERSION_NUMBER + ")";
+	public final static String VERSION_DATE = "19. October 2018 - 20. December 2018";
 
+	private final static String filesPath = "files/";
 	private final static String inputPath = "input.json";
-	private final static String templateFileName = "template.xlsx";
+	private final static String templateFileName = filesPath + "template.xlsx";
 	private final static String reportFileName = "report.xlsx";
 	private final static String reportMacroFileName = "report.xlsm";
 	private final static String reportPDFFileName = "report.pdf";
-	private final static String macroFileName = "res/vbaProject.bin";
+	private final static String macroFileName = filesPath + "vbaProject.bin";
 	
 	private static JSON inputData;
 	
@@ -55,12 +58,10 @@ public class Main {
 		
 		createTemplate();
 		
-		// createMacroTemplate();
+		createMacroTemplate();
 		
 		// openTemplate();
 
-		replacePicsInPdf("report.pdf", "report_high_quality.pdf");
-		
 		closeAllTemplates();
 		
 		System.out.println("Done!");
@@ -74,7 +75,7 @@ public class Main {
 		IoUtils.cleanAllWorkDirs();
 
 		(new File(reportFileName)).delete();
-		// (new File(reportMacroFileName)).delete();
+		(new File(reportMacroFileName)).delete();
 		// (new File(reportPDFFileName)).delete();
 	}
 	
@@ -278,51 +279,6 @@ public class Main {
 		} catch (IOException e) {
 			System.err.println("Oh no - Excel could not be started! Exception: " + e);
 		}
-	}
-	
-	private static void replacePicsInPdf(String origPdfPath, String newPdfPath) {
-	
-		File oldFile = new File(origPdfPath);
-		oldFile.copyToDisk(newPdfPath);
-	
-		PdfFile pdf = new PdfFile(newPdfPath);
-		List<PdfObject> objects = pdf.getObjects();
-		
-		String rightPath = "files/right.jpg";
-		BinaryFile rightPicFile = new BinaryFile(rightPath);
-		String rightPicContent = rightPicFile.loadContentStr();
-
-		String xdcPath = "files/xdc.jpg";
-		BinaryFile xdcPicFile = new BinaryFile(xdcPath);
-		String xdcPicContent = xdcPicFile.loadContentStr();
-
-		for (PdfObject obj : objects) {
-			if ("/XObject".equals(obj.getDictValue("/Type"))) {
-				if ("/Image".equals(obj.getDictValue("/Subtype"))) {
-					obj.setDictValue("/ColorSpace", "/DeviceRGB");
-					obj.setDictValue("/BitsPerComponent", "8");
-					obj.setDictValue("/Filter", "/DCTDecode");
-					obj.setDictValue("/Interpolate", "true");
-					obj.removeDictValue("/SMask");
-					obj.removeDictValue("/Matte");
-					
-					// the small right picture in the original report has a width of 272, the xdc picture has a width of 281
-					boolean replaceWithRightPic = obj.getDictValue("/Width").startsWith("27");
-					
-					if (replaceWithRightPic) {
-						obj.setDictValue("/Width", "2540");
-						obj.setDictValue("/Height", "794");
-						obj.setStreamContent(rightPicContent);
-					} else {
-						obj.setDictValue("/Width", "2717");
-						obj.setDictValue("/Height", "883");
-						obj.setStreamContent(xdcPicContent);
-					}
-				}
-			}
-		}
-		
-		pdf.save();
 	}
 	
 	private static void closeAllTemplates() {

@@ -39,11 +39,33 @@ Or under Linux:
 
 ## Run
 
-To start up the XDC Report Creator and let it generate a single report, you can call under Windows:
+1. To start up the XDC Report Creator and let it generate a single report, you can call under Windows:
 
 ```
-test.bat
+run_creator.bat
 ```
+
+Or under Linux:
+
+```
+run_creator.sh
+```
+
+2. Once a report has been created as report.xlsx, follow the instructions in asofterspace.com/xdc/generate.pdf to add the report creation macro.
+
+3. After a report has been created as report.pdf by Excel, it most likely does not have pictures of sufficiently high resolution - to change this, call under Windows:
+
+```
+run_improver.bat
+```
+
+Or under Linux:
+
+```
+run_improver.sh
+```
+
+This reads the report.pdf and replaces the logos inside with higher-quality ones, creating report_high_quality.pdf.
 
 ## License
 
