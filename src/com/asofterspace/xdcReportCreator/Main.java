@@ -113,8 +113,7 @@ public class Main {
 
 			// Auftrag
 			if (sheet.getTitle().startsWith("1. ")) {
-				// System.out.println("Setting Angebotsnummer to " + inputData.getString("Angebotsnummer"));
-				// System.out.println("(The old one was " + 			sheet.getCellContent("C9") + ")");
+				sheet.setCellContent("C8", inputData.getString("Auftragsdatum"));
 				sheet.setCellContent("C9", inputData.getString("Angebotsnummer"));
 				
 				// delete the scenario-based XDC for now
@@ -124,35 +123,37 @@ public class Main {
 				sheet.setCellContent("C16", standardXDC.getString("Beschreibung"));
 			}
 			
+			Integer basisjahr = standardXDC.getInteger("Basisjahr");
+				
 			// Daten Standard XDC
-			if (sheet.getTitle().startsWith("2. ")) {
+			if (sheet.getTitle().startsWith("2. ") || sheet.getTitle().startsWith("2 ")) {
 				sheet.setCellContent("C8", inputData.getInteger("Berichtsjahr"));
 				sheet.setCellContent("C10", inputData.getString("Firma"));
 				sheet.setCellContent("C12", inputData.getString("FirmenISIN"));
+				sheet.setCellContent("C14", inputData.getString("NACESektor"));
 				
-				sheet.setCellContent("A23", inputData.getString("Firma"));
-				sheet.setCellContent("A26", standardXDC.getString("DatenDatum"));
+				sheet.setCellContent("A18", standardXDC.getLong("GHGScope1"));
+				sheet.setCellContent("B18", standardXDC.getLong("GHGScope2"));
+				sheet.setCellContent("C18", standardXDC.getLong("GHGScope3"));
+				sheet.setCellContent("D18", standardXDC.getLong("EBITDA"));
+				sheet.setCellContent("F18", standardXDC.getLong("Personalkosten"));
 				
-				sheet.setCellContent("A16", standardXDC.getLong("GHGScope1"));
-				sheet.setCellContent("B16", standardXDC.getLong("GHGScope2"));
-				sheet.setCellContent("C16", standardXDC.getLong("GHGScope3"));
-				sheet.setCellContent("D16", standardXDC.getLong("EBITDA"));
-				sheet.setCellContent("F16", standardXDC.getLong("Personalkosten"));
+				sheet.setCellContent("A25", inputData.getString("Datenquelle"));
 				
-				Integer basisjahr = standardXDC.getInteger("Basisjahr");
+				sheet.setCellContent("C34", basisjahr);
 				sheet.setCellContent("C36", basisjahr);
 				sheet.setCellContent("C38", basisjahr);
 				sheet.setCellContent("C40", basisjahr);
-				sheet.setCellContent("C42", basisjahr);
-				sheet.setCellContent("E34", basisjahr + "-2050");
-				sheet.setCellContent("F34", basisjahr + "-2050");
+				sheet.setCellContent("E32", basisjahr + "-2050");
+				sheet.setCellContent("F32", basisjahr + "-2050");
 				
 				String entwicklungProcPA = standardXDC.getString("EntwicklungProcPA");
+				sheet.setCellContent("E34", entwicklungProcPA + "% p.a.");
 				sheet.setCellContent("E36", entwicklungProcPA + "% p.a.");
-				sheet.setCellContent("E38", entwicklungProcPA + "% p.a.");
-				sheet.setCellContent("F40", entwicklungProcPA + "% p.a.");
+				sheet.setCellContent("F38", entwicklungProcPA + "% p.a.");
 			}
 
+			/*
 			// Daten Szenariobasierte XDC
 			if (sheet.getTitle().startsWith("3. ")) {
 				// delete the scenario-based XDC for now
@@ -176,30 +177,34 @@ public class Main {
 				// TODO :: actually read scenarios from input.json!
 				sheet.deleteCellBlock("A17", "AJ66");
 			}
+			*/
+			
+			// XDC Sektor Übersicht
+			if (sheet.getTitle().startsWith("5. ")) {
+				sheet.setCellContent("E13", basisjahr);
+				sheet.setCellContent("E16", inputData.getString("NACESektor"));
+				
+				sheet.setCellContent("E18", "Datenquelle der Eingabedaten (" + basisjahr + ")");
+				sheet.setCellContent("K18", "XDC Ergebnisse (" + basisjahr + ")");
+				sheet.setCellContent("P18", "2°C-Reduktionsanforderungen bis 2050 (Ausgangsjahr " + basisjahr + ")");
+				String sektorStr = "";
+				if (!"".equals(inputData.getString("NACESektor"))) {
+					sektorStr = " - " + inputData.getString("NACESektor");
+				}
+				sheet.setCellContent("Y18", "NACE Sektorvergleich (" + basisjahr + ")" + sektorStr);
+			}
+			
+			// XDC Reduktionspfad
+			if (sheet.getTitle().startsWith("6. ")) {
+				// sheet.setCellContent("B13", inputData.getString("Firma")); - is actually hardlinked somewhere else in the template file .-.
+			}
 			
 			// only adjust the footer for sheets that have a footer in the template
 			if (sheet.hasFooter()) {
 				// set the date in the footer
 				sheet.setFooterContent("R", footerdate);
 				
-				/*
-				// set the page number in the footer
-				sheet.setFooterContent("C", "&P+"+pagenum);
-				// TODO :: what about multi-page sheets? (
-				// we need to count up plus the amount of pages for the particular worksheet...
-				// does Excel have a funky function for that?
-				pagenum++;
-				if (sheet.getTitle().startsWith("3. ")) {
-					pagenum++;
-				}
-				if (sheet.getTitle().startsWith("4. ")) {
-					pagenum += 2;
-				}
-				if (sheet.getTitle().startsWith("6. ")) {
-					pagenum += 4;
-				}
-				*/
-				// ACTUALLY, just set the footer to P (pagenum) and export everything as one big PDF via VBA! (see the part where we save as XLSM ^^)
+				// set the footer to P (pagenum) and export everything as one big PDF via VBA! (see the part where we save as XLSM ^^)
 				sheet.setFooterContent("C", "&P");
 			}
 			

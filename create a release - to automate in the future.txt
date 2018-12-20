@@ -1,0 +1,16 @@
+1. call build.bat
+
+2. zip up the following:
+
+bin
+files
+input.json
+run_creator.bat
+run_creator.sh
+run_improver.bat
+run_improver.sh
+UNLICENSE
+
+3. maybe adjust the documentation living under asofterspace.com/xdc/generate.pdf
+
+(in the future, we might instead want to distribute JARs - they can be created using jar.exe, but require a manifest file to be present and require different approaches for reading files that are kept inside)

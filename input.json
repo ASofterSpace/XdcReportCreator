@@ -1,14 +1,16 @@
 {
+	"Auftragsdatum": "20. Dezember 2018",
 	"Angebotsnummer": "20181023_01",
 	"Datum": "heute",
 	"Berichtsjahr": 2018,
 	"Firma": "Example Corp.",
 	"FirmenISIN": "XC987654321",
+	"NACESektor": "12.34 - Dienstleistungen zur Erzeugung von geleisteten Diensten",
+	"Datenquelle": "23.10.2018 (Example Corp. - insecure mail)",
 	"StandardXDC": {
 		"Basisjahr": 2016,
 		"Beschreibung": "Standard XDC und deren Aufspaltung in Scope 1 XDC und Scope 2 XDC nach Standard Parametereingabe von right. basierend auf unternehmenseigenen Daten zur Bestimmung des Status Quo.",
 		"EntwicklungProcPA": "2,8",
-		"DatenDatum": "23.10.2018 (Example Corp. - insecure mail)",
 		"GHGScope1": 1234567,
 		"GHGScope2": 123456,
 		"GHGScope3": 12345678,
