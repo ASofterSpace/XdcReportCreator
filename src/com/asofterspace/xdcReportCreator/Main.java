@@ -1,10 +1,13 @@
 package com.asofterspace.xdcReportCreator;
 
+import com.asofterspace.toolbox.io.BinaryFile;
+import com.asofterspace.toolbox.io.Directory;
 import com.asofterspace.toolbox.io.File;
 import com.asofterspace.toolbox.io.IoUtils;
 import com.asofterspace.toolbox.io.JSON;
 import com.asofterspace.toolbox.io.JsonFile;
 import com.asofterspace.toolbox.io.PdfFile;
+import com.asofterspace.toolbox.io.PdfObject;
 import com.asofterspace.toolbox.io.XlsmFile;
 import com.asofterspace.toolbox.io.XlsxFile;
 import com.asofterspace.toolbox.io.XlsxSheet;
@@ -55,8 +58,8 @@ public class Main {
 		// createMacroTemplate();
 		
 		// openTemplate();
-		
-		createPdfReport();
+
+		replacePicsInPdf("report.pdf", "report_high_quality.pdf");
 		
 		closeAllTemplates();
 		
@@ -71,8 +74,8 @@ public class Main {
 		IoUtils.cleanAllWorkDirs();
 
 		(new File(reportFileName)).delete();
-		(new File(reportMacroFileName)).delete();
-		(new File(reportPDFFileName)).delete();
+		// (new File(reportMacroFileName)).delete();
+		// (new File(reportPDFFileName)).delete();
 	}
 	
 	private static void loadInputData() {
@@ -277,23 +280,49 @@ public class Main {
 		}
 	}
 	
-	private static void createPdfReport() {
+	private static void replacePicsInPdf(String origPdfPath, String newPdfPath) {
 	
-		PdfFile pdf = new PdfFile(reportPDFFileName);
+		File oldFile = new File(origPdfPath);
+		oldFile.copyToDisk(newPdfPath);
+	
+		PdfFile pdf = new PdfFile(newPdfPath);
+		List<PdfObject> objects = pdf.getObjects();
 		
-		pdf.create("right. based on science");
+		String rightPath = "files/right.jpg";
+		BinaryFile rightPicFile = new BinaryFile(rightPath);
+		String rightPicContent = rightPicFile.loadContentStr();
+
+		String xdcPath = "files/xdc.jpg";
+		BinaryFile xdcPicFile = new BinaryFile(xdcPath);
+		String xdcPicContent = xdcPicFile.loadContentStr();
+
+		for (PdfObject obj : objects) {
+			if ("/XObject".equals(obj.getDictValue("/Type"))) {
+				if ("/Image".equals(obj.getDictValue("/Subtype"))) {
+					obj.setDictValue("/ColorSpace", "/DeviceRGB");
+					obj.setDictValue("/BitsPerComponent", "8");
+					obj.setDictValue("/Filter", "/DCTDecode");
+					obj.setDictValue("/Interpolate", "true");
+					obj.removeDictValue("/SMask");
+					obj.removeDictValue("/Matte");
+					
+					// the small right picture in the original report has a width of 272, the xdc picture has a width of 281
+					boolean replaceWithRightPic = obj.getDictValue("/Width").startsWith("27");
+					
+					if (replaceWithRightPic) {
+						obj.setDictValue("/Width", "2540");
+						obj.setDictValue("/Height", "794");
+						obj.setStreamContent(rightPicContent);
+					} else {
+						obj.setDictValue("/Width", "2717");
+						obj.setDictValue("/Height", "883");
+						obj.setStreamContent(xdcPicContent);
+					}
+				}
+			}
+		}
 		
 		pdf.save();
-		
-		System.out.println("Debug :: trying to read and save ex2.pdf...");
-		PdfFile pdf2 = new PdfFile("ex2.pdf");
-		pdf2.save();
-		System.out.println("Debug :: trying to read and save ex3.pdf...");
-		PdfFile pdf3 = new PdfFile("ex3.pdf");
-		pdf3.save();
-		System.out.println("Debug :: trying to read and save ex4.pdf...");
-		PdfFile pdf4 = new PdfFile("ex4.pdf");
-		pdf4.save();
 	}
 	
 	private static void closeAllTemplates() {
